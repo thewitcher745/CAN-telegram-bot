@@ -109,6 +109,9 @@ class Buttons:
     end_edit_client_api_info_conv = InlineKeyboardButton(
         "❌ End operation", callback_data="end_edit_client_api_info_conv"
     )
+    end_remove_client_conv = InlineKeyboardButton(
+        "❌ End operation", callback_data="end_remove_client_conv"
+    )
 
     @staticmethod
     def client_to_modify(name):
@@ -119,7 +122,7 @@ class Buttons:
     @staticmethod
     def remove_client(client_name):
         return InlineKeyboardButton(
-            "🗑 Remove client", callback_data=f"remove_client:{client_name}"
+            "🗑 Remove client", callback_data=f"start_remove_client_conv:{client_name}"
         )
 
     @staticmethod
@@ -170,6 +173,8 @@ class Keyboards:
     end_client_name_conv = [[Buttons.end_edit_client_name_conv]]
 
     end_client_api_info_conv = [[Buttons.end_edit_client_api_info_conv]]
+
+    end_remove_client_conv = [[Buttons.end_remove_client_conv]]
 
     @staticmethod
     def manage_clients(client_name_list):

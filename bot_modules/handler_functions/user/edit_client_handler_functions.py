@@ -42,7 +42,7 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
         await update.callback_query.answer()
 
     client_name = update.callback_query.data[len("start_edit_client_name_conv:"):]
-    context.user_data["editing_client"] = client_name
+    context.user_data["client_to_edit"] = client_name
 
     text = f"✅ Editing name for client <b>{client_name}</b>\n\nEnter your desired name:"
     keyboard = utils.Keyboards.end_client_name_conv
@@ -54,11 +54,12 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
 
 async def edit_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     new_name = update.message.text
-    text = f"✅ Client name successfully changed from {context.user_data['editing_client']} to <b>{new_name}</b>"
+    text = f"✅ Client name successfully changed from {context.user_data['client_to_edit']} to <b>{new_name}</b>"
     keyboard = utils.Keyboards.back_to_main
 
-    context.user_data["clients"][new_name] = context.user_data["clients"][context.user_data["editing_client"]]
-    del context.user_data["clients"][context.user_data["editing_client"]]
+    context.user_data["clients"][new_name] = context.user_data["clients"][context.user_data["client_to_edit"]]
+    del context.user_data["clients"][context.user_data["client_to_edit"]]
+    del context.user_data["client_to_edit"]
 
     await send_message(context, update, text, keyboard)
     return ConversationHandler.END
@@ -71,7 +72,9 @@ async def end_edit_client_name_conv(update: Update, context: ContextTypes.DEFAUL
     text = "❌ Operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
-    await send_message(context, update, text, keyboard)
+    del context.user_data["client_to_edit"]
+
+    await edit_message(update, text, keyboard)
     return ConversationHandler.END
 
 
@@ -83,7 +86,7 @@ async def start_edit_client_api_info_conv(update: Update, context: ContextTypes.
         await update.callback_query.answer()
 
     client_name = update.callback_query.data[len("start_edit_client_api_info_conv:"):]
-    context.user_data["editing_client"] = client_name
+    context.user_data["client_to_edit"] = client_name
 
     text = f"✅ Editing API information for client <b>{client_name}</b>\n\nEnter the new API key:"
     keyboard = utils.Keyboards.end_client_api_info_conv
@@ -95,7 +98,7 @@ async def start_edit_client_api_info_conv(update: Update, context: ContextTypes.
 
 async def edit_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["new_api_key"] = update.message.text
-    text = f"✅ You have entered new API key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['editing_client']}</b>\n\nNow enter the new secret key."
+    text = f"✅ You have entered new API key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nNow enter the new secret key."
     keyboard = utils.Keyboards.end_client_api_info_conv
 
     await send_message(context, update, text, keyboard)
@@ -104,7 +107,7 @@ async def edit_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def edit_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["new_secret_key"] = update.message.text
-    text = f"✅ You have entered new secret key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['editing_client']}</b>\n\nType /confirm to consolidate the change."
+    text = f"✅ You have entered new secret key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nType /confirm to consolidate the change."
 
     keyboard = utils.Keyboards.end_client_api_info_conv
 
@@ -113,14 +116,15 @@ async def edit_client_secret_key(update: Update, context: ContextTypes.DEFAULT_T
 
 
 async def confirm_api_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    client_name = context.user_data['editing_client']
-    text = f"✅ Successfully changed API information for client {context.user_data['editing_client']}"
+    client_name = context.user_data['client_to_edit']
+    text = f"✅ Successfully changed API information for client {context.user_data['client_to_edit']}"
     keyboard = utils.Keyboards.back_to_main
-    print(context.user_data["clients"])
+
     context.user_data["clients"][client_name]["api_key"] = context.user_data["new_api_key"]
     context.user_data["clients"][client_name]["secret_key"] = context.user_data["new_secret_key"]
     del context.user_data["new_api_key"]
     del context.user_data["new_secret_key"]
+    del context.user_data["client_to_edit"]
 
     await send_message(context, update, text, keyboard)
     return ConversationHandler.END
@@ -133,23 +137,50 @@ async def end_edit_client_api_info_conv(update: Update, context: ContextTypes.DE
     text = "❌ Operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
-    await send_message(context, update, text, keyboard)
+    await edit_message(update, text, keyboard)
+    del context.user_data["client_to_edit"]
+
     return ConversationHandler.END
 
 
 # ////////////////////////////////////////////////////////////////////////////////////////////////
 # Removing client from client list
 # ////////////////////////////////////////////////////////////////////////////////////////////////
-async def remove_client(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start_remove_client_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         await update.callback_query.answer()
 
-    client_name = update.callback_query.data[len("remove_client:"):]
-    print(client_name)
-    print(context.user_data["clients"])
-    del context.user_data["clients"][client_name]
-    print(context.user_data["clients"])
-    text = f"🗑 Client <b>{client_name} successfully removed.</b>"
-    keyboard = utils.Keyboards.back_to_main
+    client_name = update.callback_query.data[len("start_remove_client_conv:"):]
+    context.user_data["client_to_remove"] = client_name
+
+    text = f"🗑 Type /confirm to confirm the deletion of client <b>{client_name}</b>\n\n<b>❗ (This action is irreversible)</b> ❗"
+    keyboard = utils.Keyboards.end_remove_client_conv
 
     await edit_message(update, text, keyboard)
+
+    return "remove_client_conv.confirm"
+
+
+async def confirm_client_removal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    client_name = context.user_data['client_to_remove']
+
+    text = f"✅ Client {context.user_data['client_to_remove']} removed."
+    keyboard = utils.Keyboards.back_to_main
+    del context.user_data["clients"][client_name]
+    del context.user_data["client_to_remove"]
+
+    await send_message(context, update, text, keyboard)
+    return ConversationHandler.END
+
+
+async def end_remove_client_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        await update.callback_query.answer()
+
+    text = "❌ Operation canceled."
+    keyboard = utils.Keyboards.back_to_main
+
+    del context.user_data["client_to_remove"]
+
+    await edit_message(update, text, keyboard)
+    return ConversationHandler.END

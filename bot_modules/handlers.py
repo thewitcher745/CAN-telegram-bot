@@ -30,7 +30,6 @@ edit_client_name_handler = ConversationHandler(
         )]
     },
     fallbacks=[
-        CommandHandler("end", edit_client_handler_functions.end_edit_client_name_conv),
         CallbackQueryHandler(
             edit_client_handler_functions.end_edit_client_name_conv, pattern="end_edit_client_name_conv"
         ),
@@ -55,14 +54,26 @@ edit_client_api_info_handler = ConversationHandler(
         )]
     },
     fallbacks=[
-        CommandHandler("end", edit_client_handler_functions.end_edit_client_api_info_conv),
         CallbackQueryHandler(
-            edit_client_handler_functions.end_edit_client_api_info_conv, pattern="end_edit_client_api_info_conv"
+            edit_client_handler_functions.end_remove_client_conv, pattern="end_remove_client_conv"
         ),
     ])
 
-remove_client_handler = CallbackQueryHandler(
-    edit_client_handler_functions.remove_client, pattern=r"^remove_client:.*"
+remove_client_handler = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(edit_client_handler_functions.start_remove_client_conv,
+                             pattern=r"^start_remove_client_conv:.*")
+    ],
+    states={
+        "remove_client_conv.confirm": [
+            CommandHandler(
+                "confirm", edit_client_handler_functions.confirm_client_removal)
+        ],
+    },
+    fallbacks=[
+        CallbackQueryHandler(
+            edit_client_handler_functions.end_edit_client_api_info_conv, pattern="end_edit_client_api_info_conv"
+        )]
 )
 
 fetch_user_api_data_handler = CallbackQueryHandler(
