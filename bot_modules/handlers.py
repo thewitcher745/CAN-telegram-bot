@@ -72,7 +72,7 @@ remove_client_handler = ConversationHandler(
     },
     fallbacks=[
         CallbackQueryHandler(
-            edit_client_handler_functions.end_edit_client_api_info_conv, pattern="end_edit_client_api_info_conv"
+            edit_client_handler_functions.end_remove_client_conv, pattern="end_remove_client_conv"
         )]
 )
 

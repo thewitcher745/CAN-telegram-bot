@@ -15,7 +15,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    persistence = PicklePersistence(filepath="conversationbot")
+    persistence = PicklePersistence(filepath="persistence_file.pickle")
     application = (
         ApplicationBuilder()
         .token(dotenv_values(".env")["BOT_AUTH_TOKEN"])

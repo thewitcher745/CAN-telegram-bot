@@ -8,6 +8,8 @@
 
 - # TODO For every input, add error handling (add client done)
 
+- # TODO Encrypt client data storage
+
 # Done
 ________________________________________
 + Update exchange api checker to output each individual client separately
