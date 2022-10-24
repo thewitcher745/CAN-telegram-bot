@@ -1,0 +1,23 @@
+- # TODO Add uuid to clients
+
+- # TODO Separate end_operation commands for different conversations
+
+- # TODO Add exchange selection to client creation menu
+
+- # TODO Sort functions in *_handler_functions.py files, handlers.py and utils.py
+
+- # TODO Add exchange type to the clients in the list in client manager
+
+- # TODO For every input, add error handling
+
+- # TODO Add back functionality to conversations
+- # TODO Add individual end handlers to conversations
+
+# Done
+________________________________________
++ Update exchange api checker to output each individual client separately
++ Find a way to organize the user_handler_functions file]
+
+# Canceled
+________________________________________
+* Update defaultname when creating client to be based on exchange name
