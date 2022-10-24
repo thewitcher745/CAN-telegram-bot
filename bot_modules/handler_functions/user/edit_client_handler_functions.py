@@ -69,7 +69,7 @@ async def end_edit_client_name_conv(update: Update, context: ContextTypes.DEFAUL
     if update.callback_query:
         await update.callback_query.answer()
 
-    text = "❌ Operation canceled."
+    text = "❌ Edit client operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
     del context.user_data["client_to_edit"]
@@ -134,7 +134,7 @@ async def end_edit_client_api_info_conv(update: Update, context: ContextTypes.DE
     if update.callback_query:
         await update.callback_query.answer()
 
-    text = "❌ Operation canceled."
+    text = "❌ Edit client operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
     await edit_message(update, text, keyboard)
@@ -177,7 +177,7 @@ async def end_remove_client_conv(update: Update, context: ContextTypes.DEFAULT_T
     if update.callback_query:
         await update.callback_query.answer()
 
-    text = "❌ Operation canceled."
+    text = "❌ Remove client operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
     del context.user_data["client_to_remove"]
