@@ -30,7 +30,7 @@ async def start_new_client_conv(update: Update, context: ContextTypes.DEFAULT_TY
     keyboard = utils.Keyboards.new_client_name
     await edit_message(update, text, keyboard)
 
-    return "client_conv.states.client_name"
+    return "add_client_conv.states.client_name"
 
 
 async def get_custom_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -41,10 +41,10 @@ async def get_custom_client_name(update: Update, context: ContextTypes.DEFAULT_T
     # If the client name already exists
     if new_client_name in context.user_data["clients"].keys():
         text = f"✅ Client with name {new_client_name} already exists. Please enter a different name."
-        keyboard = utils.Keyboards.back_to_main
+        keyboard = utils.Keyboards.end_new_client_conv
         await send_message(context, update, text, keyboard)
 
-        return ConversationHandler.END
+        return "add_client_conv.states.client_name"
     else:
         context.user_data["new_client_name"] = update.message.text
 
@@ -52,7 +52,7 @@ async def get_custom_client_name(update: Update, context: ContextTypes.DEFAULT_T
         keyboard = utils.Keyboards.back_to_main
         await send_message(context, update, text, keyboard)
 
-        return "client_conv.states.client_api_key"
+        return "add_client_conv.states.client_api_key"
 
 
 async def accept_default_client_name(
@@ -68,7 +68,7 @@ async def accept_default_client_name(
     else:
         await send_message(context, update, text, keyboard)
 
-    return "client_conv.states.client_api_key"
+    return "add_client_conv.states.client_api_key"
 
 
 async def get_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -81,7 +81,7 @@ async def get_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE)
     keyboard = utils.Keyboards.end_new_client_conv
     await send_message(context, update, text, keyboard)
 
-    return "client_conv.states.client_secret_key"
+    return "add_client_conv.states.client_secret_key"
 
 
 async def get_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -94,7 +94,7 @@ async def get_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TY
     keyboard = utils.Keyboards.end_new_client_conv
     await send_message(context, update, text, keyboard)
 
-    return "client_conv.states.confirm"
+    return "add_client_conv.states.confirm"
 
 
 async def confirm_client_info(update: Update, context: ContextTypes.DEFAULT_TYPE):

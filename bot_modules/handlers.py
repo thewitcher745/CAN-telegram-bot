@@ -7,7 +7,7 @@ from telegram.ext import (
 )
 
 from bot_modules.handler_functions import exchange_handler_functions, menu_handler_functions
-from bot_modules.handler_functions.user import client_conv_handler_functions, edit_client_handler_functions
+from bot_modules.handler_functions.user import add_client_conv_handler_functions, edit_client_handler_functions
 
 start_handler = CommandHandler("start", menu_handler_functions.main_menu)
 
@@ -92,44 +92,44 @@ check_api_connection_handler = CallbackQueryHandler(
     exchange_handler_functions.check_api_connection, pattern="check_api_connection"
 )
 
-client_conv_handler = ConversationHandler(
+add_client_conv_handler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            client_conv_handler_functions.start_new_client_conv,
+            add_client_conv_handler_functions.start_new_client_conv,
             pattern="start_new_client_conv",
         ),
     ],
     states={
-        "client_conv.states.client_name": [
+        "add_client_conv.states.client_name": [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                client_conv_handler_functions.get_custom_client_name,
+                add_client_conv_handler_functions.get_custom_client_name,
             ),
             CallbackQueryHandler(
-                client_conv_handler_functions.accept_default_client_name,
+                add_client_conv_handler_functions.accept_default_client_name,
                 pattern="accept_default_client_name",
             ),
         ],
-        "client_conv.states.client_api_key": [
+        "add_client_conv.states.client_api_key": [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                client_conv_handler_functions.get_client_api_key,
+                add_client_conv_handler_functions.get_client_api_key,
             )
         ],
-        "client_conv.states.client_secret_key": [
+        "add_client_conv.states.client_secret_key": [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
-                client_conv_handler_functions.get_client_secret_key,
+                add_client_conv_handler_functions.get_client_secret_key,
             )
         ],
-        "client_conv.states.confirm": [
-            CommandHandler("confirm", client_conv_handler_functions.confirm_client_info)
+        "add_client_conv.states.confirm": [
+            CommandHandler("confirm", add_client_conv_handler_functions.confirm_client_info)
         ],
     },
     fallbacks=[
-        CommandHandler("end", client_conv_handler_functions.end_new_client_conv),
+        CommandHandler("end", add_client_conv_handler_functions.end_new_client_conv),
         CallbackQueryHandler(
-            client_conv_handler_functions.end_new_client_conv, pattern="end_new_client_conv"
+            add_client_conv_handler_functions.end_new_client_conv, pattern="end_new_client_conv"
         ),
     ],
 )

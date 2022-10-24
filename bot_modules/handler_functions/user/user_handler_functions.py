@@ -1,5 +1,4 @@
 from telegram import (
-    InlineKeyboardButton,
     Update,
 )
 from telegram.ext import (
@@ -24,5 +23,5 @@ async def fetch_user_api_info(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     else:
         text = '🟠 You haven\'t entered your API authentication information yet. \🤔\n\n✔ You can access your API info through your exchange, then use the "Enter/Change API key" option in the main menu or the menu below to provide the bot with your credentials. 💱'
-        keyboard = utils.Keyboars.portfolio_no_clients
+        keyboard = utils.Keyboards.portfolio_no_clients
         await edit_message(update, text, keyboard)

@@ -24,6 +24,9 @@ if __name__ == "__main__":
     )
     handlers = [
         handlers.start_handler,
+
+        handlers.add_client_conv_handler,
+
         handlers.client_manager_handler,
         handlers.client_manager_name_handler,
         handlers.remove_client_handler,
@@ -35,7 +38,7 @@ if __name__ == "__main__":
         handlers.signal_handler,
         handlers.back_to_main_handler,
         handlers.check_api_connection_handler,
-        handlers.client_conv_handler,
+
     ]
 
     for handler in handlers:
