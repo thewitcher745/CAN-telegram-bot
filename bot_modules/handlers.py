@@ -24,7 +24,7 @@ edit_client_name_handler = ConversationHandler(
         edit_client_handler_functions.start_edit_client_name_conv, pattern=r"^start_edit_client_name_conv:.*"
     )],
     states={
-        "edit_client_name_conv.name": [MessageHandler(
+        "edit_client_name_conv.states.name": [MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             edit_client_handler_functions.edit_client_name,
         )]
@@ -40,15 +40,15 @@ edit_client_api_info_handler = ConversationHandler(
         edit_client_handler_functions.start_edit_client_api_info_conv, pattern=r"^start_edit_client_api_info_conv:.*"
     )],
     states={
-        "edit_client_api_info_conv.api_key": [MessageHandler(
+        "edit_client_api_info_conv.states.api_key": [MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             edit_client_handler_functions.edit_client_api_key,
         )],
-        "edit_client_api_info_conv.secret_key": [MessageHandler(
+        "edit_client_api_info_conv.states.secret_key": [MessageHandler(
             filters.TEXT & ~filters.COMMAND,
             edit_client_handler_functions.edit_client_secret_key,
         )],
-        "edit_client_api_info_conv.confirm": [CommandHandler(
+        "edit_client_api_info_conv.states.confirm": [CommandHandler(
             "confirm",
             edit_client_handler_functions.confirm_api_info,
         )]
@@ -65,7 +65,7 @@ remove_client_handler = ConversationHandler(
                              pattern=r"^start_remove_client_conv:.*")
     ],
     states={
-        "remove_client_conv.confirm": [
+        "remove_client_conv.states.confirm": [
             CommandHandler(
                 "confirm", edit_client_handler_functions.confirm_client_removal)
         ],

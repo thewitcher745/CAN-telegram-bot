@@ -1,12 +1,12 @@
+- ## TODO Check for repeated/blank client names during edit client name
+
 - # TODO Add uuid to clients
 
 - # TODO Add exchange selection to client creation menu
 
-- # TODO Sort functions in *_handler_functions.py files, handlers.py and utils.py
-
 - # TODO Add exchange type to the clients in the list in client manager / portfolio
 
-- # TODO For every input, add error handling (add client done)
+- # TODO For every manual input, add error handling (add client done)
 
 - # TODO Encrypt client data storage
 
@@ -17,6 +17,8 @@ ________________________________________
 + Add individual end handlers to conversations
 + Add back functionality to conversations
 + Separate end_operation commands for different conversations
++ Sort functions in *_handler_functions.py files, handlers.py and utils.py
++ For every manual input, add error handling (add client done)
 
 # Canceled
 ________________________________________

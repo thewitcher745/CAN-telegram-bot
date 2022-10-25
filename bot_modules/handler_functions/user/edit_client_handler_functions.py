@@ -42,6 +42,7 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
         await update.callback_query.answer()
 
     client_name = update.callback_query.data[len("start_edit_client_name_conv:"):]
+
     context.user_data["client_to_edit"] = client_name
 
     text = f"✅ Editing name for client <b>{client_name}</b>\n\nEnter your desired name:"
@@ -49,20 +50,35 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
 
     await edit_message(update, text, keyboard)
 
-    return "edit_client_name_conv.name"
+    return "edit_client_name_conv.states.name"
 
 
 async def edit_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    new_name = update.message.text
-    text = f"✅ Client name successfully changed from {context.user_data['client_to_edit']} to <b>{new_name}</b>"
-    keyboard = utils.Keyboards.back_to_main
+    new_name = update.message.text.strip()
+    # If the client name is empty
+    if new_name == "":
+        text = f"❕ Client name was left empty. Please enter a valid name."
+        keyboard = utils.Keyboards.end_new_client_conv
+        await send_message(context, update, text, keyboard)
 
-    context.user_data["clients"][new_name] = context.user_data["clients"][context.user_data["client_to_edit"]]
-    del context.user_data["clients"][context.user_data["client_to_edit"]]
-    del context.user_data["client_to_edit"]
+        return "edit_client_name_conv.states.name"
+    # If the client name already exists
+    elif new_name in context.user_data["clients"].keys():
+        text = f"❕ Client with name {new_name} already exists. Please enter a different name."
+        keyboard = utils.Keyboards.end_new_client_conv
+        await send_message(context, update, text, keyboard)
 
-    await send_message(context, update, text, keyboard)
-    return ConversationHandler.END
+        return "edit_client_name_conv.states.name"
+    else:
+        text = f"✅ Client name successfully changed from {context.user_data['client_to_edit']} to <b>{new_name}</b>"
+        keyboard = utils.Keyboards.back_to_main
+
+        context.user_data["clients"][new_name] = context.user_data["clients"][context.user_data["client_to_edit"]]
+        del context.user_data["clients"][context.user_data["client_to_edit"]]
+        del context.user_data["client_to_edit"]
+
+        await send_message(context, update, text, keyboard)
+        return ConversationHandler.END
 
 
 async def end_edit_client_name_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -93,26 +109,37 @@ async def start_edit_client_api_info_conv(update: Update, context: ContextTypes.
 
     await edit_message(update, text, keyboard)
 
-    return "edit_client_api_info_conv.api_key"
+    return "edit_client_api_info_conv.states.api_key"
 
 
 async def edit_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["new_api_key"] = update.message.text
-    text = f"✅ You have entered new API key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nNow enter the new secret key."
-    keyboard = utils.Keyboards.end_client_api_info_conv
+    context.user_data["new_api_key"] = update.message.text.strip()
 
-    await send_message(context, update, text, keyboard)
-    return "edit_client_api_info_conv.secret_key"
+    keyboard = utils.Keyboards.end_client_api_info_conv
+    if context.user_data["new_api_key"] == "":
+        text = f"❕ API key can't be empty. Please re-enter the API info."
+        await send_message(context, update, text, keyboard)
+
+        return "edit_client_api_info_conv.states.api_key"
+    else:
+        text = f"✅ You have entered new API key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nNow enter the new secret key."
+        await send_message(context, update, text, keyboard)
+        return "edit_client_api_info_conv.states.secret_key"
 
 
 async def edit_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["new_secret_key"] = update.message.text
-    text = f"✅ You have entered new secret key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nType /confirm to consolidate the change."
+    context.user_data["new_secret_key"] = update.message.text.strip()
 
     keyboard = utils.Keyboards.end_client_api_info_conv
+    if context.user_data["new_secret_key"] == "":
+        text = f"❕ Secret key can't be empty. Please re-enter the API info."
+        await send_message(context, update, text, keyboard)
 
-    await send_message(context, update, text, keyboard)
-    return "edit_client_api_info_conv.confirm"
+        return "edit_client_api_info_conv.states.secret_key"
+    else:
+        text = f"✅ You have entered new secret key <b>{context.user_data['new_api_key']}</b> for client <b>{context.user_data['client_to_edit']}</b>\n\nType /confirm to consolidate the change."
+        await send_message(context, update, text, keyboard)
+        return "edit_client_api_info_conv.states.confirm"
 
 
 async def confirm_api_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -158,7 +185,7 @@ async def start_remove_client_conv(update: Update, context: ContextTypes.DEFAULT
 
     await edit_message(update, text, keyboard)
 
-    return "remove_client_conv.confirm"
+    return "remove_client_conv.states.confirm"
 
 
 async def confirm_client_removal(update: Update, context: ContextTypes.DEFAULT_TYPE):

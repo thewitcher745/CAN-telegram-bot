@@ -20,12 +20,13 @@ async def start_new_client_conv(update: Update, context: ContextTypes.DEFAULT_TY
     if update.callback_query:
         await update.callback_query.answer()
 
+    # If it's the user's first time creating clients
     if not "clients" in context.user_data.keys():
         context.user_data["clients"] = {}
     context.user_data[
         "default_name"
     ] = f"Client{len(context.user_data['clients'].keys()) + 1}"
-    text = f"❗ Enter a custom name for the client, or accept the recommended default name of <b>{context.user_data['default_name']}</b>"
+    text = f"❕ Enter a custom name for the client, or accept the recommended default name of <b>{context.user_data['default_name']}</b>"
 
     keyboard = utils.Keyboards.new_client_name
     await edit_message(update, text, keyboard)
@@ -36,8 +37,10 @@ async def start_new_client_conv(update: Update, context: ContextTypes.DEFAULT_TY
 async def get_custom_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         await update.callback_query.answer()
+
     new_client_name = update.message.text
 
+    # If the client name is empty
     if new_client_name == "":
         text = f"❕ Client name was left empty. Please enter a valid name."
         keyboard = utils.Keyboards.end_new_client_conv
