@@ -6,6 +6,7 @@ from bot_modules import utils
 send_message = utils.send_message
 edit_message = utils.edit_message
 
+
 async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not "has_used_bot" in context.user_data.keys():
         context.user_data["has_used_bot"] = True

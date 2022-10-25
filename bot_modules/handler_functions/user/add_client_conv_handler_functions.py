@@ -28,7 +28,7 @@ async def start_new_client_conv(update: Update, context: ContextTypes.DEFAULT_TY
     ] = f"Client{len(context.user_data['clients'].keys()) + 1}"
     text = f"❕ Enter a custom name for the client, or accept the recommended default name of <b>{context.user_data['default_name']}</b>"
 
-    keyboard = utils.Keyboards.new_client_name
+    keyboard = utils.Keyboards.AddClient.new_client_name
     await edit_message(update, text, keyboard)
 
     return "add_client_conv.states.client_name"
@@ -38,19 +38,19 @@ async def get_custom_client_name(update: Update, context: ContextTypes.DEFAULT_T
     if update.callback_query:
         await update.callback_query.answer()
 
-    new_client_name = update.message.text
+    new_client_name = update.message.text.strip()
 
     # If the client name is empty
     if new_client_name == "":
         text = f"❕ Client name was left empty. Please enter a valid name."
-        keyboard = utils.Keyboards.end_new_client_conv
+        keyboard = utils.Keyboards.AddClient.end_conv
         await send_message(context, update, text, keyboard)
 
         return "add_client_conv.states.client_name"
     # If the client name already exists
     elif new_client_name in context.user_data["clients"].keys():
         text = f"❕ Client with name {new_client_name} already exists. Please enter a different name."
-        keyboard = utils.Keyboards.end_new_client_conv
+        keyboard = utils.Keyboards.AddClient.end_conv
         await send_message(context, update, text, keyboard)
 
         return "add_client_conv.states.client_name"
@@ -70,7 +70,7 @@ async def accept_default_client_name(
     context.user_data["new_client_name"] = context.user_data["default_name"]
 
     text = f"✅ Client name set to {context.user_data['new_client_name']}.\n\n❗ Now enter your API key."
-    keyboard = utils.Keyboards.end_new_client_conv
+    keyboard = utils.Keyboards.AddClient.end_conv
     if update.callback_query:
         await update.callback_query.answer()
         await edit_message(update, text, keyboard)
@@ -87,7 +87,7 @@ async def get_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data["new_api_key"] = update.message.text.strip()
 
     text = f"💡 Entered API key {context.user_data['new_api_key']}. \n\n❗ Now enter your secret key:"
-    keyboard = utils.Keyboards.end_new_client_conv
+    keyboard = utils.Keyboards.AddClient.end_conv
     await send_message(context, update, text, keyboard)
 
     return "add_client_conv.states.client_secret_key"
@@ -100,7 +100,7 @@ async def get_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TY
     context.user_data["new_secret_key"] = update.message.text.strip()
 
     text = f"💡 <b>Your entered info:</b>\n\n<b>Client name:</b> {context.user_data['new_client_name']}\n\n<b>API key:</b> {context.user_data['new_api_key']}\n\n<b>Secret key:</b> {context.user_data['new_secret_key']}\n\nType /confirm to finish creating the client."
-    keyboard = utils.Keyboards.end_new_client_conv
+    keyboard = utils.Keyboards.AddClient.end_conv
     await send_message(context, update, text, keyboard)
 
     return "add_client_conv.states.confirm"

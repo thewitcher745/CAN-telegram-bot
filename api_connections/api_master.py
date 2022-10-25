@@ -45,5 +45,5 @@ class Exchange:
             return "Success"
         except AuthenticationError:
             return "AuthError"
-        except Exception:
-            return "GeneralError"
+        # except Exception:
+        #     return "GeneralError"

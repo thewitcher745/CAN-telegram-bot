@@ -82,12 +82,61 @@ def fetch_user_client_list(context):
 
 
 class Buttons:
-    add_new_client = InlineKeyboardButton(
-        "➕ Add new client", callback_data="start_new_client_conv"
-    )
-    client_manager = InlineKeyboardButton(
-        "📝 Client manager", callback_data="client_manager"
-    )
+    class AddClient:
+        add_new_client = InlineKeyboardButton(
+            "➕ Add new client", callback_data="start_new_client_conv"
+        )
+        accept_default_client_name = InlineKeyboardButton(
+            "✅ Accept default name", callback_data="accept_default_client_name"
+        )
+        end_conv = InlineKeyboardButton(
+            "❌ End operation", callback_data="end_new_client_conv"
+        )
+
+    class ClientManager:
+        client_manager = InlineKeyboardButton(
+            "📝 Client manager", callback_data="client_manager"
+        )
+
+        @staticmethod
+        def client_to_modify(name):
+            return InlineKeyboardButton(
+                f"⭕ {name}", callback_data=f"edit_client:{name}"
+            )
+
+    class EditClientName:
+        end_conv = InlineKeyboardButton(
+            "❌ End operation", callback_data="end_edit_client_name_conv"
+        )
+
+        @staticmethod
+        def edit_client_name(client_name):
+            return InlineKeyboardButton(
+                "🖊 Edit client name", callback_data=f"start_edit_client_name_conv:{client_name}"
+            )
+
+    class EditClientAPI:
+        end_conv = InlineKeyboardButton(
+            "❌ End operation", callback_data="end_edit_client_api_info_conv"
+        )
+
+        @staticmethod
+        def edit_client_api_info(client_name):
+            return InlineKeyboardButton(
+                "🖊 Edit client API info", callback_data=f"start_edit_client_api_info_conv:{client_name}"
+            )
+
+    class RemoveClient:
+        end_conv = InlineKeyboardButton(
+            "❌ End operation", callback_data="end_remove_client_conv"
+        )
+
+        @staticmethod
+        def remove_client(client_name):
+            return InlineKeyboardButton(
+                "🗑 Remove client", callback_data=f"start_remove_client_conv:{client_name}"
+            )
+
     portfolio = InlineKeyboardButton(
         "💵 Portfolio", callback_data="fetch_user_portfolio"
     )
@@ -97,45 +146,6 @@ class Buttons:
     back_to_main = InlineKeyboardButton(
         "↩ Back to main menu", callback_data="back_to_main"
     )
-    end_new_client_conv = InlineKeyboardButton(
-        "❌ End operation", callback_data="end_new_client_conv"
-    )
-    accept_default_client_name = InlineKeyboardButton(
-        "✅ Accept default name", callback_data="accept_default_client_name"
-    )
-    end_edit_client_name_conv = InlineKeyboardButton(
-        "❌ End operation", callback_data="end_edit_client_name_conv"
-    )
-    end_edit_client_api_info_conv = InlineKeyboardButton(
-        "❌ End operation", callback_data="end_edit_client_api_info_conv"
-    )
-    end_remove_client_conv = InlineKeyboardButton(
-        "❌ End operation", callback_data="end_remove_client_conv"
-    )
-
-    @staticmethod
-    def client_to_modify(name):
-        return InlineKeyboardButton(
-            f"⭕ {name}", callback_data=f"edit_client:{name}"
-        )
-
-    @staticmethod
-    def remove_client(client_name):
-        return InlineKeyboardButton(
-            "🗑 Remove client", callback_data=f"start_remove_client_conv:{client_name}"
-        )
-
-    @staticmethod
-    def edit_client_api_info(client_name):
-        return InlineKeyboardButton(
-            "🖊 Edit client API info", callback_data=f"start_edit_client_api_info_conv:{client_name}"
-        )
-
-    @staticmethod
-    def edit_client_name(client_name):
-        return InlineKeyboardButton(
-            "🖊 Edit client name", callback_data=f"start_edit_client_name_conv:{client_name}"
-        )
 
     @staticmethod
     def previous_menu(callback_data):
@@ -145,56 +155,61 @@ class Buttons:
 
 
 class Keyboards:
-    manage_clients_empty = [
-        [Buttons.add_new_client],
-        [Buttons.back_to_main],
-    ]
+    class AddClient:
+        new_client_name = [
+            [Buttons.AddClient.accept_default_client_name],
+            [Buttons.AddClient.end_conv],
+        ]
+        end_conv = [[Buttons.AddClient.end_conv]]
+
+    class ClientManager:
+        manage_clients_empty = [
+            [Buttons.AddClient.add_new_client],
+            [Buttons.back_to_main],
+        ]
+
+        @staticmethod
+        def manage_clients(client_name_list):
+            keyboard = []
+            row = []
+
+            for i, client_name in enumerate(client_name_list):
+                row.append(Buttons.ClientManager.client_to_modify(client_name))
+
+                if i % 2 == 1:
+                    keyboard.append(row)
+                    row = []
+            keyboard.append(row)
+            keyboard.extend(Keyboards.back_to_main)
+            return keyboard
+
+        @staticmethod
+        def edit_client(client_name):
+            keyboard = [[Buttons.EditClientAPI.edit_client_api_info(client_name),
+                         Buttons.EditClientName.edit_client_name(client_name)],
+                        [Buttons.RemoveClient.remove_client(client_name)],
+                        [Buttons.back_to_main, Buttons.previous_menu("client_manager")]]
+
+            return keyboard
+
+    class EditClientName:
+        end_conv = [[Buttons.EditClientName.end_conv]]
+
+    class EditClientAPI:
+        end_conv = [[Buttons.EditClientAPI.end_conv]]
+
+    class RemoveClient:
+        end_conv = [[Buttons.RemoveClient.end_conv]]
 
     main_menu = [
-        [Buttons.add_new_client, Buttons.client_manager],
+        [Buttons.AddClient.add_new_client, Buttons.ClientManager.client_manager],
         [Buttons.portfolio],
         [Buttons.check_api_connection],
-    ]
-
-    new_client_name = [
-        [Buttons.accept_default_client_name],
-        [Buttons.end_new_client_conv],
     ]
 
     back_to_main = [[Buttons.back_to_main]]
 
     portfolio_no_clients = [
-        [Buttons.add_new_client],
+        [Buttons.AddClient.add_new_client],
         [Buttons.back_to_main],
     ]
-
-    end_new_client_conv = [[Buttons.end_new_client_conv]]
-
-    end_client_name_conv = [[Buttons.end_edit_client_name_conv]]
-
-    end_client_api_info_conv = [[Buttons.end_edit_client_api_info_conv]]
-
-    end_remove_client_conv = [[Buttons.end_remove_client_conv]]
-
-    @staticmethod
-    def manage_clients(client_name_list):
-        keyboard = []
-        row = []
-
-        for i, client_name in enumerate(client_name_list):
-            row.append(Buttons.client_to_modify(client_name))
-
-            if i % 2 == 1:
-                keyboard.append(row)
-                row = []
-        keyboard.append(row)
-        keyboard.extend(Keyboards.back_to_main)
-        return keyboard
-
-    @staticmethod
-    def edit_client(client_name):
-        keyboard = [[Buttons.edit_client_api_info(client_name), Buttons.edit_client_name(client_name)],
-                    [Buttons.remove_client(client_name)],
-                    [Buttons.back_to_main, Buttons.previous_menu("client_manager")]]
-
-        return keyboard

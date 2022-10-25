@@ -14,10 +14,10 @@ async def client_manager(update: Update, context: ContextTypes.DEFAULT_TYPE):
     client_name_list = utils.fetch_user_client_list(context)
     if len(client_name_list) > 0:
         text = "🟢 <b>Client manager menu</b>\n\nSelect the client you wish to edit:"
-        keyboard = utils.Keyboards.manage_clients(client_name_list)
+        keyboard = utils.Keyboards.ClientManager.manage_clients(client_name_list)
     else:
         text = "🟢 <b>Client manager menu</b>\n\nYou don't have any clients to edit. Add new clients first through main menu or the button below."
-        keyboard = utils.Keyboards.manage_clients_empty
+        keyboard = utils.Keyboards.ClientManager.manage_clients_empty
 
     await edit_message(update, text, keyboard)
 
@@ -29,7 +29,7 @@ async def edit_client(update: Update, context: ContextTypes.DEFAULT_TYPE):
     client_name = update.callback_query.data[len("edit_client:"):]
 
     text = f"ℹ Currently editing client <b>{client_name}</b>"
-    keyboard = utils.Keyboards.edit_client(client_name)
+    keyboard = utils.Keyboards.ClientManager.edit_client(client_name)
 
     await edit_message(update, text, keyboard)
 
@@ -46,7 +46,7 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
     context.user_data["client_to_edit"] = client_name
 
     text = f"✅ Editing name for client <b>{client_name}</b>\n\nEnter your desired name:"
-    keyboard = utils.Keyboards.end_client_name_conv
+    keyboard = utils.Keyboards.EditClientName.end_conv
 
     await edit_message(update, text, keyboard)
 
@@ -58,14 +58,14 @@ async def edit_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # If the client name is empty
     if new_name == "":
         text = f"❕ Client name was left empty. Please enter a valid name."
-        keyboard = utils.Keyboards.end_new_client_conv
+        keyboard = utils.Keyboards.EditClientName.end_conv
         await send_message(context, update, text, keyboard)
 
         return "edit_client_name_conv.states.name"
     # If the client name already exists
     elif new_name in context.user_data["clients"].keys():
         text = f"❕ Client with name {new_name} already exists. Please enter a different name."
-        keyboard = utils.Keyboards.end_new_client_conv
+        keyboard = utils.Keyboards.EditClientName.end_conv
         await send_message(context, update, text, keyboard)
 
         return "edit_client_name_conv.states.name"
@@ -105,7 +105,7 @@ async def start_edit_client_api_info_conv(update: Update, context: ContextTypes.
     context.user_data["client_to_edit"] = client_name
 
     text = f"✅ Editing API information for client <b>{client_name}</b>\n\nEnter the new API key:"
-    keyboard = utils.Keyboards.end_client_api_info_conv
+    keyboard = utils.Keyboards.EditClientAPI.end_conv
 
     await edit_message(update, text, keyboard)
 
@@ -115,7 +115,7 @@ async def start_edit_client_api_info_conv(update: Update, context: ContextTypes.
 async def edit_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["new_api_key"] = update.message.text.strip()
 
-    keyboard = utils.Keyboards.end_client_api_info_conv
+    keyboard = utils.Keyboards.EditClientAPI.end_conv
     if context.user_data["new_api_key"] == "":
         text = f"❕ API key can't be empty. Please re-enter the API info."
         await send_message(context, update, text, keyboard)
@@ -130,7 +130,7 @@ async def edit_client_api_key(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def edit_client_secret_key(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["new_secret_key"] = update.message.text.strip()
 
-    keyboard = utils.Keyboards.end_client_api_info_conv
+    keyboard = utils.Keyboards.EditClientAPI.end_conv
     if context.user_data["new_secret_key"] == "":
         text = f"❕ Secret key can't be empty. Please re-enter the API info."
         await send_message(context, update, text, keyboard)
@@ -181,7 +181,7 @@ async def start_remove_client_conv(update: Update, context: ContextTypes.DEFAULT
     context.user_data["client_to_remove"] = client_name
 
     text = f"🗑 Type /confirm to confirm the deletion of client <b>{client_name}</b>\n\n<b>❗ (This action is irreversible)</b> ❗"
-    keyboard = utils.Keyboards.end_remove_client_conv
+    keyboard = utils.Keyboards.RemoveClient.end_conv
 
     await edit_message(update, text, keyboard)
 

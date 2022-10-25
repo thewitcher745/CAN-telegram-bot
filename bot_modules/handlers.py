@@ -19,6 +19,48 @@ client_manager_name_handler = CallbackQueryHandler(
     edit_client_handler_functions.edit_client, pattern=r"^edit_client:.*"
 )
 
+add_client_conv_handler = ConversationHandler(
+    entry_points=[
+        CallbackQueryHandler(
+            add_client_conv_handler_functions.start_new_client_conv,
+            pattern="start_new_client_conv",
+        ),
+    ],
+    states={
+        "add_client_conv.states.client_name": [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                add_client_conv_handler_functions.get_custom_client_name,
+            ),
+            CallbackQueryHandler(
+                add_client_conv_handler_functions.accept_default_client_name,
+                pattern="accept_default_client_name",
+            ),
+        ],
+        "add_client_conv.states.client_api_key": [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                add_client_conv_handler_functions.get_client_api_key,
+            )
+        ],
+        "add_client_conv.states.client_secret_key": [
+            MessageHandler(
+                filters.TEXT & ~filters.COMMAND,
+                add_client_conv_handler_functions.get_client_secret_key,
+            )
+        ],
+        "add_client_conv.states.confirm": [
+            CommandHandler("confirm", add_client_conv_handler_functions.confirm_client_info)
+        ],
+    },
+    fallbacks=[
+        CommandHandler("end", add_client_conv_handler_functions.end_new_client_conv),
+        CallbackQueryHandler(
+            add_client_conv_handler_functions.end_new_client_conv, pattern="end_new_client_conv"
+        ),
+    ],
+)
+
 edit_client_name_handler = ConversationHandler(
     entry_points=[CallbackQueryHandler(
         edit_client_handler_functions.start_edit_client_name_conv, pattern=r"^start_edit_client_name_conv:.*"
@@ -90,48 +132,6 @@ back_to_main_handler = CallbackQueryHandler(
 
 check_api_connection_handler = CallbackQueryHandler(
     exchange_handler_functions.check_api_connection, pattern="check_api_connection"
-)
-
-add_client_conv_handler = ConversationHandler(
-    entry_points=[
-        CallbackQueryHandler(
-            add_client_conv_handler_functions.start_new_client_conv,
-            pattern="start_new_client_conv",
-        ),
-    ],
-    states={
-        "add_client_conv.states.client_name": [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                add_client_conv_handler_functions.get_custom_client_name,
-            ),
-            CallbackQueryHandler(
-                add_client_conv_handler_functions.accept_default_client_name,
-                pattern="accept_default_client_name",
-            ),
-        ],
-        "add_client_conv.states.client_api_key": [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                add_client_conv_handler_functions.get_client_api_key,
-            )
-        ],
-        "add_client_conv.states.client_secret_key": [
-            MessageHandler(
-                filters.TEXT & ~filters.COMMAND,
-                add_client_conv_handler_functions.get_client_secret_key,
-            )
-        ],
-        "add_client_conv.states.confirm": [
-            CommandHandler("confirm", add_client_conv_handler_functions.confirm_client_info)
-        ],
-    },
-    fallbacks=[
-        CommandHandler("end", add_client_conv_handler_functions.end_new_client_conv),
-        CallbackQueryHandler(
-            add_client_conv_handler_functions.end_new_client_conv, pattern="end_new_client_conv"
-        ),
-    ],
 )
 
 signal_handler = MessageHandler(
