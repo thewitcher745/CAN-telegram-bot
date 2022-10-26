@@ -1,14 +1,30 @@
-- ## TODO Check for repeated/blank client names during edit client name
+- ### TODO Add exchange amd account type editing to edit_client
 
-- # TODO Add uuid to clients
+- ## TODO Put new client data into separate object ("new_client") instead of storing each key in the outer dict scope
 
-- # TODO Add exchange selection to client creation menu
+- ## TODO Convert clients from dicts to python objects for easier management
+
+- # TODO Fix the Exchange class bug where you have to instantiate the class before calling methods!
+
+- # TODO Implement a bot that can manage this bot
+
+- # TODO Add uuid to client
 
 - # TODO Add exchange type to the clients in the list in client manager / portfolio
 
 - # TODO For every manual input, add error handling (add client done)
 
 - # TODO Encrypt client data storage
+
+- # TODO Change handler function names for consistency (get for user input, select for callback queries)
+
+- # TODO Do much better commenting on the code
+
+- # TODO Consider saving the EXCHANGE object alongside the user data when adding/editing a client
+
+
+
+
 
 # Done
 ________________________________________
@@ -19,6 +35,7 @@ ________________________________________
 + Separate end_operation commands for different conversations
 + Sort functions in *_handler_functions.py files, handlers.py and utils.py
 + For every manual input, add error handling (add client done)
++ Add exchange selection to client creation menu
 
 # Canceled
 ________________________________________

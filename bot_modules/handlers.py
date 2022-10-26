@@ -22,8 +22,8 @@ client_manager_name_handler = CallbackQueryHandler(
 add_client_conv_handler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(
-            add_client_conv_handler_functions.start_new_client_conv,
-            pattern="start_new_client_conv",
+            add_client_conv_handler_functions.start_add_client_conv,
+            pattern="start_add_client_conv",
         ),
     ],
     states={
@@ -37,6 +37,14 @@ add_client_conv_handler = ConversationHandler(
                 pattern="accept_default_client_name",
             ),
         ],
+        "add_client_conv.states.exchange": [CallbackQueryHandler(
+            add_client_conv_handler_functions.select_exchange,
+            pattern="^add_client_exchange:.*",
+        )],
+        "add_client_conv.states.account_type": [CallbackQueryHandler(
+            add_client_conv_handler_functions.select_account_type,
+            pattern="^add_client_account_type:.*",
+        )],
         "add_client_conv.states.client_api_key": [
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND,
@@ -56,7 +64,7 @@ add_client_conv_handler = ConversationHandler(
     fallbacks=[
         CommandHandler("end", add_client_conv_handler_functions.end_new_client_conv),
         CallbackQueryHandler(
-            add_client_conv_handler_functions.end_new_client_conv, pattern="end_new_client_conv"
+            add_client_conv_handler_functions.end_new_client_conv, pattern="end_add_client_conv"
         ),
     ],
 )

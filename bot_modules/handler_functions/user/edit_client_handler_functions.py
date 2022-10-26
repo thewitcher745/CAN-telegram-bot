@@ -14,10 +14,10 @@ async def client_manager(update: Update, context: ContextTypes.DEFAULT_TYPE):
     client_name_list = utils.fetch_user_client_list(context)
     if len(client_name_list) > 0:
         text = "🟢 <b>Client manager menu</b>\n\nSelect the client you wish to edit:"
-        keyboard = utils.Keyboards.ClientManager.manage_clients(client_name_list)
+        keyboard = utils.Keyboards.ClientManager.client_list(client_name_list)
     else:
         text = "🟢 <b>Client manager menu</b>\n\nYou don't have any clients to edit. Add new clients first through main menu or the button below."
-        keyboard = utils.Keyboards.ClientManager.manage_clients_empty
+        keyboard = utils.Keyboards.ClientManager.empty
 
     await edit_message(update, text, keyboard)
 

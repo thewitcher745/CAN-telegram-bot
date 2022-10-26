@@ -1,5 +1,6 @@
 import re
 
+import ccxt
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 
@@ -84,13 +85,28 @@ def fetch_user_client_list(context):
 class Buttons:
     class AddClient:
         add_new_client = InlineKeyboardButton(
-            "➕ Add new client", callback_data="start_new_client_conv"
+            "➕ Add new client", callback_data="start_add_client_conv"
         )
         accept_default_client_name = InlineKeyboardButton(
             "✅ Accept default name", callback_data="accept_default_client_name"
         )
+
+        class Exchanges:
+            binance = InlineKeyboardButton(
+                "🪙 Binance", callback_data="add_client_exchange:binance"
+            )
+            bybit = InlineKeyboardButton(
+                "🪙 ByBit", callback_data="add_client_exchange:bybit"
+            )
+
+        # Account type buttons
+        futures = InlineKeyboardButton(
+            "📈 Futures", callback_data="add_client_account_type:future"
+        )
+
+        # End conversation
         end_conv = InlineKeyboardButton(
-            "❌ End operation", callback_data="end_new_client_conv"
+            "❌ End operation", callback_data="end_add_client_conv"
         )
 
     class ClientManager:
@@ -105,6 +121,7 @@ class Buttons:
             )
 
     class EditClientName:
+        # End conversation
         end_conv = InlineKeyboardButton(
             "❌ End operation", callback_data="end_edit_client_name_conv"
         )
@@ -116,6 +133,7 @@ class Buttons:
             )
 
     class EditClientAPI:
+        # End conversation
         end_conv = InlineKeyboardButton(
             "❌ End operation", callback_data="end_edit_client_api_info_conv"
         )
@@ -127,6 +145,7 @@ class Buttons:
             )
 
     class RemoveClient:
+        # End conversation
         end_conv = InlineKeyboardButton(
             "❌ End operation", callback_data="end_remove_client_conv"
         )
@@ -156,20 +175,28 @@ class Buttons:
 
 class Keyboards:
     class AddClient:
-        new_client_name = [
+        name = [
             [Buttons.AddClient.accept_default_client_name],
+            [Buttons.AddClient.end_conv],
+        ]
+        exchange = [
+            [Buttons.AddClient.Exchanges.binance, Buttons.AddClient.Exchanges.bybit],
+            [Buttons.AddClient.end_conv],
+        ]
+        account_type = [
+            [Buttons.AddClient.futures],
             [Buttons.AddClient.end_conv],
         ]
         end_conv = [[Buttons.AddClient.end_conv]]
 
     class ClientManager:
-        manage_clients_empty = [
+        empty = [
             [Buttons.AddClient.add_new_client],
             [Buttons.back_to_main],
         ]
 
         @staticmethod
-        def manage_clients(client_name_list):
+        def client_list(client_name_list):
             keyboard = []
             row = []
 
@@ -180,6 +207,7 @@ class Keyboards:
                     keyboard.append(row)
                     row = []
             keyboard.append(row)
+            keyboard.extend([[Buttons.AddClient.add_new_client]])
             keyboard.extend(Keyboards.back_to_main)
             return keyboard
 
@@ -213,3 +241,45 @@ class Keyboards:
         [Buttons.AddClient.add_new_client],
         [Buttons.back_to_main],
     ]
+
+
+class Client:
+    def __init__(self):
+        self.name = ""
+        self.api_key = ""
+        self.secret_key = ""
+        self.exchange_id = ""
+        self.account_type = ""
+
+        self.exchange = None
+
+    def create_exchange(self):
+        exchange_class = getattr(ccxt, self.exchange_id)
+        self.exchange = exchange_class(
+            {
+                "apiKey": self.api_key,
+                "secret": self.secret_key,
+                "options": {
+                    "defaultType": self.account_type,
+                },
+            }
+        )
+
+
+class User:
+    def __init__(self):
+        has_used_bot = False
+        self.clients = []
+
+    def is_repeated_client(self, client_name):
+        for client in self.clients:
+            if client.name == client_name:
+                return False
+
+        return True
+
+    def add_client(self, new_client: Client):
+        self.clients = self.clients.append(new_client)
+
+    def remove_client(self, client_name: str):
+        self.clients = list(filter(lambda client: client.name == client_name, self.clients))

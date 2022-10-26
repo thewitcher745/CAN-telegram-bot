@@ -3,10 +3,13 @@ from ccxt.base.errors import AuthenticationError
 
 
 class Exchange:
-    def __init__(self, api_key, secret_key):
-        exchange_id = "binance"
+    def __init__(self, api_key="", secret_key="", exchange_id="binance", account_type="future"):
+        self.api_key = api_key
+        self.secret_key = secret_key
+        self.exchange_id = exchange_id
+        self.account_type = account_type
 
-        exchange_class = getattr(ccxt, exchange_id)
+        exchange_class = getattr(ccxt, "binance")
         self.exchange = exchange_class(
             {
                 "apiKey": api_key,
