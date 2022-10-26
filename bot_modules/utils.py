@@ -1,6 +1,7 @@
 import re
 
 import ccxt
+from ccxt.base.errors import AuthenticationError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 
@@ -73,13 +74,6 @@ def check_user_auth(context):
     if "api_key" in context.user_data and "secret_key" in context.user_data:
         return True
     return False
-
-
-def fetch_user_client_list(context):
-    try:
-        return context.user_data["clients"].keys()
-    except KeyError:
-        return []
 
 
 class Buttons:
@@ -265,21 +259,65 @@ class Client:
             }
         )
 
+    def api_fetch_client_balance(self):
+        balances = self.exchange.fetch_balance()
+        btc_price = float(self.exchange.fetch_ticker("BTC/USDT")["close"])
+        return {
+            "totalWalletBalance": (
+                float(balances["free"]["USDT"]),
+                float(balances["free"]["USDT"]) / btc_price,
+            ),
+            # "totalMarginBalance": (
+            #     float(balances["totalMarginBalance"]),
+            #     float(balances["totalMarginBalance"]) / btc_price,
+            # ),
+            # "totalCrossWalletBalance": (
+            #     float(balances["totalCrossWalletBalance"]),
+            #     float(balances["totalCrossWalletBalance"]) / btc_price,
+            # ),
+            # "maxWithdrawAmount": (
+            #     float(balances["maxWithdrawAmount"]),
+            #     float(balances["maxWithdrawAmount"]) / btc_price,
+            # ),
+        }
+
+    def api_check_api_connection(self):
+        try:
+            self.exchange.fetch_balance()
+            return "Success"
+        except AuthenticationError:
+            return "AuthError"
+        # except Exception:
+        #     return "GeneralError"
+
 
 class User:
     def __init__(self):
-        has_used_bot = False
         self.clients = []
+        self.new_client = None
+        self.client_to_edit = ""
 
-    def is_repeated_client(self, client_name):
+    def find_client_by_name(self, client_name):
+        return list(filter(lambda client: client.name == client_name, self.clients))[0]
+
+    def client_name_exists(self, client_name):
         for client in self.clients:
             if client.name == client_name:
-                return False
+                return True
 
-        return True
+        return False
+
+    def get_next_default_name(self):
+        for i in range(20):
+            next_name = f"Client{i + 1}"
+            if not self.client_name_exists(next_name):
+                return next_name
 
     def add_client(self, new_client: Client):
-        self.clients = self.clients.append(new_client)
+        self.clients.append(new_client)
 
     def remove_client(self, client_name: str):
-        self.clients = list(filter(lambda client: client.name == client_name, self.clients))
+        self.clients = list(filter(lambda client: client.name != client_name, self.clients))
+
+    def update_client(self, client_name: str):
+        pass

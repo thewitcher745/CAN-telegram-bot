@@ -1,6 +1,6 @@
 - ### TODO Add exchange amd account type editing to edit_client
 
-- ## TODO Put new client data into separate object ("new_client") instead of storing each key in the outer dict scope
+- # TODO Add view client info to client manager (Probably use __repr__ in Client class)
 
 - ## TODO Convert clients from dicts to python objects for easier management
 
@@ -36,6 +36,7 @@ ________________________________________
 + Sort functions in *_handler_functions.py files, handlers.py and utils.py
 + For every manual input, add error handling (add client done)
 + Add exchange selection to client creation menu
++ Put new client data into separate object ("new_client") instead of storing each key in the outer dict scope
 
 # Canceled
 ________________________________________

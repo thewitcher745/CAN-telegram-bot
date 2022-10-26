@@ -2,7 +2,6 @@ from ccxt.base.errors import AuthenticationError
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from api_connections import api_master
 from bot_modules import utils
 
 edit_message = utils.edit_message
@@ -40,21 +39,21 @@ async def fetch_user_portfolio(update: Update, context: ContextTypes.DEFAULT_TYP
     await edit_message(update, loading_text)
 
     keyboard = utils.Keyboards.back_to_main
-    client_name_list = utils.fetch_user_client_list(context)
+    client_list = context.user_data["user"].clients
 
-    if len(client_name_list) > 0:
+    if len(client_list) > 0:
         text = ""
-        for client_name in client_name_list:
+        for client in client_list:
             try:
-                exchange = context.user_data["clients"][client_name]["exchange"]
-                api_master.Exchange()
+                # exchange = client.exchange
+                client.create_exchange()
 
-                balances = exchange.api_fetch_client_balance()
-                text += f"<b>{client_name}</b>\n💵 Total wallet balance ({round(balances['totalWalletBalance'][1], 6)}BTC = {round(balances['totalWalletBalance'][0], 3)}USDT)\n\n"
+                balances = client.api_fetch_client_balance()
+                text += f"<b>{client.name}</b>\n💵 Total wallet balance ({round(balances['totalWalletBalance'][1], 6)}BTC = {round(balances['totalWalletBalance'][0], 3)}USDT)\n\n"
 
             except AuthenticationError:
-                text += f"<b>{client_name}</b>\n❌ Logging in to exchange failed using the provided API and secret " \
-                        f"keys. Please check if they are valid.\n\n "
+                text += f"<b>{client.name}</b>\n❌ Logging in to exchange failed using the provided API and secret " \
+                        f"keys. Please check if they are valid.\n\n"
 
     else:
         text = f"❌ No clients were found! Try adding some through the main menu or the button below."
@@ -71,21 +70,21 @@ async def check_api_connection(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard = utils.Keyboards.back_to_main
     await edit_message(update, loading_text)
 
-    client_name_list = utils.fetch_user_client_list(context)
+    client_list = context.user_data["user"].clients
 
-    if len(client_name_list) > 0:
+    if len(client_list) > 0:
         text = ""
-        for client_name in client_name_list:
-            exchange = context.user_data["clients"][client_name]["exchange"]
-            api_master.Exchange()
-            check_result = exchange.api_check_api_connection()
+        for client in client_list:
+            # exchange = client.exchange()
+            # api_master.Exchange()
+            check_result = client.api_check_api_connection()
 
             if check_result == "Success":
-                text += f"✅ <b>{client_name}</b>\n API is accessible and credentials are correct.\n\n"
+                text += f"✅ <b>{client.name}</b>\nAPI is accessible and credentials are correct.\n\n"
             elif check_result == "AuthError":
-                text += f"❌ <b>{client_name}</b>\n API is accessible, but the API key and/or secret don't seem to work.\n\n"
+                text += f"❌ <b>{client.name}</b>\nAPI is accessible, but the API key and/or secret don't seem to work.\n\n"
             else:
-                text += f"❌ <b>{client_name}</b>\n API is inaccessible, this can be due to a server issue from the exchange or the bot's server being unable to connect to the exchange. Contact the admins.\n\n"
+                text += f"❌ <b>{client.name}</b>\nAPI is inaccessible, this can be due to a server issue from the exchange or the bot's server being unable to connect to the exchange. Contact the admins.\n\n"
     else:
         text = f"❌ No clients were found! Try adding some through the main menu or the button below."
         keyboard = utils.Keyboards.portfolio_no_clients
