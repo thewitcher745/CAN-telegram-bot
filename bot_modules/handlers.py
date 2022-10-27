@@ -109,6 +109,28 @@ edit_client_api_info_handler = ConversationHandler(
         ),
     ])
 
+edit_client_exchange_handler = ConversationHandler(
+    entry_points=[CallbackQueryHandler(
+        edit_client_handler_functions.start_edit_client_exchange_conv, pattern=r"^start_edit_client_exchange_conv:.*"
+    )],
+    states={
+        "edit_client_exchange_conv.states.exchange": [CallbackQueryHandler(
+            edit_client_handler_functions.edit_client_exchange, pattern="^edit_client_exchange:.*"
+        )],
+        "edit_client_exchange_conv.states.account_type": [CallbackQueryHandler(
+            edit_client_handler_functions.edit_client_account_type, pattern="^edit_client_account_type:.*"
+        )],
+        "edit_client_exchange_conv.states.confirm": [CommandHandler(
+            "confirm",
+            edit_client_handler_functions.confirm_exchange,
+        )]
+    },
+    fallbacks=[
+        CallbackQueryHandler(
+            edit_client_handler_functions.end_edit_client_exchange_conv, pattern="end_edit_client_exchange_conv"
+        ),
+    ])
+
 remove_client_handler = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(edit_client_handler_functions.start_remove_client_conv,

@@ -43,9 +43,10 @@ async def start_edit_client_name_conv(update: Update, context: ContextTypes.DEFA
     if update.callback_query:
         await update.callback_query.answer()
 
-    context.user_data["user"].client_to_edit = update.callback_query.data[len("start_edit_client_name_conv:"):]
+    client_name = update.callback_query.data[len("start_edit_client_name_conv:"):]
+    context.user_data["user"].client_to_edit = context.user_data["user"].find_client_by_name(client_name)
 
-    text = f"✅ Editing name for client <b>{context.user_data['user'].client_to_edit}</b>\n\nEnter your desired name:"
+    text = f"✅ Editing name for client <b>{context.user_data['user'].client_to_edit.name}</b>\n\nEnter your desired name:"
     keyboard = utils.Keyboards.EditClientName.end_conv
 
     await edit_message(update, text, keyboard)
@@ -74,8 +75,8 @@ async def edit_client_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = utils.Keyboards.back_to_main
 
         old_name = context.user_data["user"].client_to_edit.name
-        context.user_data["user"].find_client_by_name(old_name).name = new_name
-        context.user_data["user"].client_to_edit = ""
+        context.user_data["user"].client_to_edit.name = new_name
+        context.user_data["user"].client_to_edit = None
 
         await send_message(context, update, text, keyboard)
         return ConversationHandler.END
@@ -88,9 +89,91 @@ async def end_edit_client_name_conv(update: Update, context: ContextTypes.DEFAUL
     text = "❌ Edit client operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
-    context.user_data["user"].client_to_edit = ""
+    context.user_data["user"].client_to_edit = None
 
     await edit_message(update, text, keyboard)
+    return ConversationHandler.END
+
+
+# /////////////////////////////////////////////////////////////////////////////////
+# Editing client exchange information
+# /////////////////////////////////////////////////////////////////////////////////
+async def start_edit_client_exchange_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        await update.callback_query.answer()
+
+    client_name = update.callback_query.data[len("start_edit_client_api_info_conv:"):]
+    context.user_data["user"].new_client = Client()
+    context.user_data["user"].new_client.name = client_name
+
+    text = f"✅ Editing exchange information for client <b>{context.user_data['user'].new_client.name}</b>\n\nSelect your exchange:"
+    keyboard = utils.Keyboards.EditClientExchange.exchange
+
+    await edit_message(update, text, keyboard)
+
+    return "edit_client_exchange_conv.states.exchange"
+
+
+async def edit_client_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        await update.callback_query.answer()
+
+    new_exchange = update.callback_query.data[len("edit_client_exchange:"):]
+    context.user_data["user"].new_client.exchange_id = new_exchange
+
+    text = f"✅ Exchange <b>{new_exchange}</b> selected.\n\nSelect your account type:"
+    keyboard = utils.Keyboards.EditClientExchange.account_type
+
+    await edit_message(update, text, keyboard)
+
+    return "edit_client_exchange_conv.states.account_type"
+
+
+async def edit_client_account_type(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        await update.callback_query.answer()
+
+    new_account_type = update.callback_query.data[len("edit_client_account_type:"):]
+    context.user_data["user"].new_client.account_type = new_account_type
+
+    text = f"✅ Exchange information for client  <b>{context.user_data['user'].new_client.name}</b> will be changed to:\n\n" \
+           f"<b>Exchange</b>: {context.user_data['user'].new_client.exchange_id}\n" \
+           f"<b>Account type</b>: {context.user_data['user'].new_client.account_type}\n\n" \
+           f"Type /confirm to consolidate changes."
+    keyboard = utils.Keyboards.EditClientExchange.end_conv
+
+    await edit_message(update, text, keyboard)
+
+    return "edit_client_exchange_conv.states.confirm"
+
+
+async def confirm_exchange(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    client_to_edit = context.user_data["user"].find_client_by_name(context.user_data["user"].new_client.name)
+    new_client = context.user_data["user"].new_client
+
+    text = f"✅ Successfully changed exchange information for client {client_to_edit.name}"
+    keyboard = utils.Keyboards.back_to_main
+
+    client_to_edit.exchange_id = new_client.exchange_id
+    client_to_edit.account_type = new_client.account_type
+
+    context.user_data["user"].new_client = None
+
+    await send_message(context, update, text, keyboard)
+
+    return ConversationHandler.END
+
+
+async def end_edit_client_exchange_conv(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        await update.callback_query.answer()
+
+    text = "❌ Edit client operation canceled."
+    keyboard = utils.Keyboards.back_to_main
+
+    await edit_message(update, text, keyboard)
+    context.user_data["user"].new_client = None
+
     return ConversationHandler.END
 
 
@@ -156,7 +239,6 @@ async def confirm_api_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     client_to_edit.api_key = new_client.api_key
     client_to_edit.secret_key = new_client.secret_key
-    client_to_edit.create_exchange()
 
     context.user_data["user"].new_client = None
 
@@ -185,7 +267,7 @@ async def start_remove_client_conv(update: Update, context: ContextTypes.DEFAULT
         await update.callback_query.answer()
 
     client_name = update.callback_query.data[len("start_remove_client_conv:"):]
-    context.user_data["user"].client_to_edit = client_name
+    context.user_data["user"].client_to_edit = context.user_data["user"].find_client_by_name(client_name)
 
     text = f"🗑 Type /confirm to confirm the deletion of client <b>{client_name}</b>\n\n<b>❗ (This action is irreversible)</b> ❗"
     keyboard = utils.Keyboards.RemoveClient.end_conv
@@ -196,14 +278,13 @@ async def start_remove_client_conv(update: Update, context: ContextTypes.DEFAULT
 
 
 async def confirm_client_removal(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    client_name = context.user_data["user"].client_to_edit
-
+    client_name = context.user_data["user"].client_to_edit.name
     context.user_data["user"].remove_client(client_name)
 
     text = f"✅ Client {client_name} removed."
     keyboard = utils.Keyboards.back_to_main
 
-    context.user_data["user"].client_to_edit = ""
+    context.user_data["user"].client_to_edit = None
 
     await send_message(context, update, text, keyboard)
     return ConversationHandler.END
@@ -216,7 +297,7 @@ async def end_remove_client_conv(update: Update, context: ContextTypes.DEFAULT_T
     text = "❌ Remove client operation canceled."
     keyboard = utils.Keyboards.back_to_main
 
-    context.user_data["user"].client_to_edit = ""
+    context.user_data["user"].client_to_edit = None
 
     await edit_message(update, text, keyboard)
     return ConversationHandler.END

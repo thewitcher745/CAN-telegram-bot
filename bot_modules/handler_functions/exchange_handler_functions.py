@@ -44,15 +44,15 @@ async def fetch_user_portfolio(update: Update, context: ContextTypes.DEFAULT_TYP
     if len(client_list) > 0:
         text = ""
         for client in client_list:
+            text += f"<b>{client.name}</b> ({client.exchange} - {client.account_type})"
             try:
-                # exchange = client.exchange
                 client.create_exchange()
 
                 balances = client.api_fetch_client_balance()
-                text += f"<b>{client.name}</b>\n💵 Total wallet balance ({round(balances['totalWalletBalance'][1], 6)}BTC = {round(balances['totalWalletBalance'][0], 3)}USDT)\n\n"
+                text += f"\n💵 Total wallet balance ({round(balances['totalWalletBalance'][1], 6)}BTC = {round(balances['totalWalletBalance'][0], 3)}USDT)\n\n"
 
             except AuthenticationError:
-                text += f"<b>{client.name}</b>\n❌ Logging in to exchange failed using the provided API and secret " \
+                text += f"\n❌ Logging in to exchange failed using the provided API and secret " \
                         f"keys. Please check if they are valid.\n\n"
 
     else:
@@ -75,8 +75,8 @@ async def check_api_connection(update: Update, context: ContextTypes.DEFAULT_TYP
     if len(client_list) > 0:
         text = ""
         for client in client_list:
-            # exchange = client.exchange()
-            # api_master.Exchange()
+            client.create_exchange()
+
             check_result = client.api_check_api_connection()
 
             if check_result == "Success":

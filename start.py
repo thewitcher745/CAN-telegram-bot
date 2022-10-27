@@ -32,6 +32,7 @@ if __name__ == "__main__":
         handlers.remove_client_handler,
         handlers.edit_client_name_handler,
         handlers.edit_client_api_info_handler,
+        handlers.edit_client_exchange_handler,
 
         handlers.fetch_user_api_data_handler,
         handlers.fetch_balance_handler,

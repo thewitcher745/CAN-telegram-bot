@@ -138,6 +138,31 @@ class Buttons:
                 "🖊 Edit client API info", callback_data=f"start_edit_client_api_info_conv:{client_name}"
             )
 
+    class EditClientExchange:
+        # Exchange buttons
+        class Exchanges:
+            binance = InlineKeyboardButton(
+                "🪙 Binance", callback_data="edit_client_exchange:binance"
+            )
+            bybit = InlineKeyboardButton(
+                "🪙 ByBit", callback_data="edit_client_exchange:bybit"
+            )
+
+        # Account type buttons
+        futures = InlineKeyboardButton(
+            "📈 Futures", callback_data="edit_client_account_type:future"
+        )
+        # End conversation
+        end_conv = InlineKeyboardButton(
+            "❌ End operation", callback_data="end_edit_client_exchange_conv"
+        )
+
+        @staticmethod
+        def edit_client_exchange(client_name):
+            return InlineKeyboardButton(
+                "🖊 Edit client exchange info", callback_data=f"start_edit_client_exchange_conv:{client_name}"
+            )
+
     class RemoveClient:
         # End conversation
         end_conv = InlineKeyboardButton(
@@ -207,8 +232,9 @@ class Keyboards:
 
         @staticmethod
         def edit_client(client_name):
-            keyboard = [[Buttons.EditClientAPI.edit_client_api_info(client_name),
-                         Buttons.EditClientName.edit_client_name(client_name)],
+            keyboard = [[Buttons.EditClientName.edit_client_name(client_name)],
+                        [Buttons.EditClientAPI.edit_client_api_info(client_name)],
+                        [Buttons.EditClientExchange.edit_client_exchange(client_name)],
                         [Buttons.RemoveClient.remove_client(client_name)],
                         [Buttons.back_to_main, Buttons.previous_menu("client_manager")]]
 
@@ -219,6 +245,17 @@ class Keyboards:
 
     class EditClientAPI:
         end_conv = [[Buttons.EditClientAPI.end_conv]]
+
+    class EditClientExchange:
+        exchange = [
+            [Buttons.EditClientExchange.Exchanges.binance, Buttons.EditClientExchange.Exchanges.bybit],
+            [Buttons.EditClientExchange.end_conv],
+        ]
+        account_type = [
+            [Buttons.EditClientExchange.futures],
+            [Buttons.EditClientExchange.end_conv],
+        ]
+        end_conv = [[Buttons.AddClient.end_conv]]
 
     class RemoveClient:
         end_conv = [[Buttons.RemoveClient.end_conv]]
@@ -258,6 +295,15 @@ class Client:
                 },
             }
         )
+        self.exchange = exchange_class(
+            {
+                "apiKey": self.api_key,
+                "secret": self.secret_key,
+                "options": {
+                    "defaultType": self.account_type,
+                },
+            }
+        )
 
     def api_fetch_client_balance(self):
         balances = self.exchange.fetch_balance()
@@ -266,19 +312,7 @@ class Client:
             "totalWalletBalance": (
                 float(balances["free"]["USDT"]),
                 float(balances["free"]["USDT"]) / btc_price,
-            ),
-            # "totalMarginBalance": (
-            #     float(balances["totalMarginBalance"]),
-            #     float(balances["totalMarginBalance"]) / btc_price,
-            # ),
-            # "totalCrossWalletBalance": (
-            #     float(balances["totalCrossWalletBalance"]),
-            #     float(balances["totalCrossWalletBalance"]) / btc_price,
-            # ),
-            # "maxWithdrawAmount": (
-            #     float(balances["maxWithdrawAmount"]),
-            #     float(balances["maxWithdrawAmount"]) / btc_price,
-            # ),
+            )
         }
 
     def api_check_api_connection(self):
@@ -287,15 +321,12 @@ class Client:
             return "Success"
         except AuthenticationError:
             return "AuthError"
-        # except Exception:
-        #     return "GeneralError"
 
 
 class User:
     def __init__(self):
         self.clients = []
         self.new_client = None
-        self.client_to_edit = ""
 
     def find_client_by_name(self, client_name):
         return list(filter(lambda client: client.name == client_name, self.clients))[0]
